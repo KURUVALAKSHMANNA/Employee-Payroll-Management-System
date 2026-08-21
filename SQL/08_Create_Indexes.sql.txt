@@ -1,0 +1,16 @@
+-- =========================================================
+-- INDEXES
+-- Purpose: Improves query performance on frequently
+-- searched and joined columns.
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+CREATE INDEX idx_employee_department
+ON Employee(department_id);
+
+CREATE INDEX idx_employee_salary
+ON Employee(basic_salary);
+
+CREATE INDEX idx_attendance_employee_date
+ON Attendance(employee_id, attendance_date);

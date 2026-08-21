@@ -1,0 +1,64 @@
+-- =========================================================
+-- VIEWS
+-- Purpose: Provides reusable employee salary information
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+CREATE VIEW employee_salary_view AS
+SELECT
+    e.employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+    d.department_name,
+    dg.designation_name,
+    s.basic_salary,
+    s.hra,
+    s.da,
+    s.allowance,
+    s.deduction,
+    (
+        s.basic_salary +
+        s.hra +
+        s.da +
+        s.allowance -
+        s.deduction
+    ) AS net_salary
+FROM Employee e
+JOIN Department d
+    ON e.department_id = d.department_id
+JOIN Designation dg
+    ON e.designation_id = dg.designation_id
+JOIN Salary s
+    ON e.employee_id = s.employee_id;
+
+
+CREATE VIEW current_employee_salary_view AS
+SELECT
+    e.employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+    d.department_name,
+    dg.designation_name,
+    s.basic_salary,
+    s.hra,
+    s.da,
+    s.allowance,
+    s.deduction,
+    (
+        s.basic_salary +
+        s.hra +
+        s.da +
+        s.allowance -
+        s.deduction
+    ) AS net_salary
+FROM Employee e
+JOIN Department d
+    ON e.department_id = d.department_id
+JOIN Designation dg
+    ON e.designation_id = dg.designation_id
+JOIN Salary s
+    ON e.employee_id = s.employee_id
+WHERE s.effective_from = (
+    SELECT MAX(s2.effective_from)
+    FROM Salary s2
+    WHERE s2.employee_id = s.employee_id
+);

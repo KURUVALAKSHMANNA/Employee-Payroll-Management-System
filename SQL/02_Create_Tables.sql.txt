@@ -1,0 +1,111 @@
+-- =========================================================
+-- TABLES: Employee Payroll Database
+-- Purpose: Creates all tables required for the payroll system
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+-- Department Table
+
+CREATE TABLE Department (
+    department_id INT PRIMARY KEY AUTO_INCREMENT,
+    department_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Designation Table
+
+CREATE TABLE Designation (
+    designation_id INT PRIMARY KEY AUTO_INCREMENT,
+    designation_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Employee Table
+
+CREATE TABLE Employee (
+    employee_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50),
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(15),
+
+    department_id INT NOT NULL,
+    designation_id INT NOT NULL,
+    manager_id INT NULL,
+
+    joining_date DATE NOT NULL,
+    basic_salary DECIMAL(12,2) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+
+    FOREIGN KEY (department_id)
+        REFERENCES Department(department_id),
+
+    FOREIGN KEY (designation_id)
+        REFERENCES Designation(designation_id),
+
+    FOREIGN KEY (manager_id)
+        REFERENCES Employee(employee_id),
+
+    CHECK (basic_salary > 0)
+);
+
+-- Attendance Table
+
+CREATE TABLE Attendance (
+    attendance_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    attendance_date DATE NOT NULL,
+    status ENUM('Present', 'Absent', 'Leave') NOT NULL,
+
+    FOREIGN KEY (employee_id)
+        REFERENCES Employee(employee_id),
+
+    UNIQUE(employee_id, attendance_date)
+);
+
+-- Salary Table
+
+CREATE TABLE Salary (
+    salary_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    effective_from DATE NOT NULL,
+
+    basic_salary DECIMAL(12,2) NOT NULL,
+    hra DECIMAL(12,2) DEFAULT 0,
+    da DECIMAL(12,2) DEFAULT 0,
+    allowance DECIMAL(12,2) DEFAULT 0,
+    deduction DECIMAL(12,2) DEFAULT 0,
+
+    FOREIGN KEY (employee_id)
+        REFERENCES Employee(employee_id)
+);
+
+-- Payroll Table
+
+CREATE TABLE Payroll (
+    payroll_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    payroll_month DATE NOT NULL,
+
+    basic_salary DECIMAL(12,2) NOT NULL,
+    hra DECIMAL(12,2) DEFAULT 0,
+    da DECIMAL(12,2) DEFAULT 0,
+    allowance DECIMAL(12,2) DEFAULT 0,
+    deduction DECIMAL(12,2) DEFAULT 0,
+
+    net_salary DECIMAL(12,2),
+
+    FOREIGN KEY (employee_id)
+        REFERENCES Employee(employee_id),
+
+    UNIQUE(employee_id, payroll_month)
+);
+
+-- Salary Audit Table
+
+CREATE TABLE SalaryAudit (
+    audit_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT,
+    old_salary DECIMAL(12,2),
+    new_salary DECIMAL(12,2),
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

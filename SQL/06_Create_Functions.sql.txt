@@ -1,0 +1,32 @@
+-- =========================================================
+-- FUNCTION: CalculateNetSalary
+-- Purpose: Calculates employee net salary.
+-- Formula:
+-- Net Salary = Basic Salary + HRA + DA + Allowance - Deduction
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+DELIMITER //
+
+CREATE FUNCTION CalculateNetSalary(
+    p_basic_salary DECIMAL(12,2),
+    p_hra DECIMAL(12,2),
+    p_da DECIMAL(12,2),
+    p_allowance DECIMAL(12,2),
+    p_deduction DECIMAL(12,2)
+)
+RETURNS DECIMAL(12,2)
+DETERMINISTIC
+BEGIN
+
+    RETURN
+        p_basic_salary
+        + p_hra
+        + p_da
+        + p_allowance
+        - p_deduction;
+
+END //
+
+DELIMITER ;

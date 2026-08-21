@@ -1,0 +1,35 @@
+-- =========================================================
+-- TRIGGER: salary_update_audit
+-- Purpose: Records salary changes in SalaryAudit table
+-- whenever an employee's basic salary is updated.
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+DELIMITER //
+
+CREATE TRIGGER salary_update_audit
+AFTER UPDATE ON Salary
+FOR EACH ROW
+BEGIN
+
+    IF OLD.basic_salary <> NEW.basic_salary THEN
+
+        INSERT INTO SalaryAudit
+        (
+            employee_id,
+            old_salary,
+            new_salary
+        )
+        VALUES
+        (
+            OLD.employee_id,
+            OLD.basic_salary,
+            NEW.basic_salary
+        );
+
+    END IF;
+
+END //
+
+DELIMITER ;

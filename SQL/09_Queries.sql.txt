@@ -1,0 +1,171 @@
+-- =========================================================
+-- QUERIES
+-- Purpose: Business queries and testing queries
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+
+-- 1. Display all employees
+SELECT * FROM Employee;
+
+
+-- 2. Display all departments
+SELECT * FROM Department;
+
+
+-- 3. Display all payroll records
+SELECT * FROM Payroll;
+
+
+-- 4. Get employees by department
+CALL GetEmployeesByDepartment(1);
+
+
+-- 5. Search employee by name
+CALL SearchEmployees('Lakshman', NULL);
+
+
+-- 6. Search employees by department
+CALL SearchEmployees(NULL, 1);
+
+
+-- 7. Generate payroll for September 2026
+CALL GeneratePayroll('2026-09-01');
+
+
+-- 8. Calculate net salary
+SELECT CalculateNetSalary(
+    45000,
+    9000,
+    4500,
+    3000,
+    1500
+) AS net_salary;
+
+
+-- 9. Calculate net salary for all employees
+SELECT
+    employee_id,
+    basic_salary,
+    hra,
+    da,
+    allowance,
+    deduction,
+    CalculateNetSalary(
+        basic_salary,
+        hra,
+        da,
+        allowance,
+        deduction
+    ) AS net_salary
+FROM Salary;
+
+
+-- 10. Payroll report
+SELECT
+    p.payroll_month,
+    e.employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+    d.department_name,
+    p.basic_salary,
+    p.hra,
+    p.da,
+    p.allowance,
+    p.deduction,
+    p.net_salary
+FROM Payroll p
+JOIN Employee e
+    ON p.employee_id = e.employee_id
+JOIN Department d
+    ON e.department_id = d.department_id
+ORDER BY
+    p.payroll_month,
+    d.department_name,
+    employee_name;
+
+
+-- 11. Department-wise payroll summary
+SELECT
+    d.department_name,
+    COUNT(p.employee_id) AS employee_count,
+    SUM(p.basic_salary) AS total_basic_salary,
+    SUM(p.net_salary) AS total_net_salary,
+    AVG(p.net_salary) AS average_net_salary
+FROM Payroll p
+JOIN Employee e
+    ON p.employee_id = e.employee_id
+JOIN Department d
+    ON e.department_id = d.department_id
+GROUP BY d.department_name
+ORDER BY total_net_salary DESC;
+
+
+-- 12. Attendance summary
+SELECT
+    e.employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+
+    SUM(CASE
+        WHEN a.status = 'Present' THEN 1
+        ELSE 0
+    END) AS present_days,
+
+    SUM(CASE
+        WHEN a.status = 'Absent' THEN 1
+        ELSE 0
+    END) AS absent_days,
+
+    SUM(CASE
+        WHEN a.status = 'Leave' THEN 1
+        ELSE 0
+    END) AS leave_days
+
+FROM Employee e
+LEFT JOIN Attendance a
+    ON e.employee_id = a.employee_id
+GROUP BY
+    e.employee_id,
+    e.first_name,
+    e.last_name;
+
+
+-- 13. Employee and manager report
+SELECT
+    e.employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+    CONCAT(m.first_name, ' ', m.last_name) AS manager_name,
+    d.department_name,
+    e.basic_salary
+FROM Employee e
+LEFT JOIN Employee m
+    ON e.manager_id = m.employee_id
+JOIN Department d
+    ON e.department_id = d.department_id
+ORDER BY manager_name;
+
+
+-- 14. Test salary audit trigger
+UPDATE Salary
+SET basic_salary = 50000
+WHERE employee_id = 3;
+
+SELECT * FROM SalaryAudit;
+
+
+-- 15. View employee salary information
+SELECT * FROM employee_salary_view;
+
+
+-- 16. View current employee salary
+SELECT * FROM current_employee_salary_view;
+
+
+-- 17. Checking duplicates are present or not
+SELECT
+    employee_id,
+    payroll_month,
+    COUNT(*) AS record_count
+FROM Payroll
+GROUP BY employee_id, payroll_month
+HAVING COUNT(*) > 1;

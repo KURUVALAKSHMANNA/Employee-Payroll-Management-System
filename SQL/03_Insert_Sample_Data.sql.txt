@@ -1,0 +1,137 @@
+-- =========================================================
+-- DATA INSERTION
+-- Purpose: Inserts sample data into Employee Payroll tables
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+-- Department Data
+
+INSERT INTO Department (department_name)
+VALUES
+('IT'),
+('HR'),
+('Finance'),
+('Sales'),
+('Operations');
+
+-- Designation Data
+
+INSERT INTO Designation (designation_name)
+VALUES
+('Software Developer'),
+('Senior Developer'),
+('HR Executive'),
+('Accountant'),
+('Sales Executive'),
+('Manager');
+
+
+-- Employee Data
+-- First insert managers
+
+INSERT INTO Employee
+(
+    first_name, last_name, email, phone,
+    department_id, designation_id, manager_id,
+    joining_date, basic_salary
+)
+VALUES
+('Rahul', 'Sharma', 'rahul@company.com', '9876543210',
+ 1, 6, NULL, '2020-01-10', 90000),
+
+('Priya', 'Reddy', 'priya@company.com', '9876543211',
+ 2, 6, NULL, '2021-03-15', 75000);
+
+-- Insert employees reporting to managers
+
+INSERT INTO Employee
+(
+    first_name, last_name, email, phone,
+    department_id, designation_id, manager_id,
+    joining_date, basic_salary
+)
+VALUES
+('Lakshman', 'Kumar', 'lakshman@company.com', '9876543212',
+ 1, 1, 1, '2023-06-12', 45000),
+
+('Arjun', 'Rao', 'arjun@company.com', '9876543213',
+ 1, 2, 1, '2022-05-20', 65000),
+
+('Sneha', 'Reddy', 'sneha@company.com', '9876543214',
+ 2, 3, 2, '2023-02-10', 40000),
+
+('Vijay', 'Kumar', 'vijay@company.com', '9876543215',
+ 3, 4, NULL, '2022-08-15', 55000),
+
+('Anjali', 'Rao', 'anjali@company.com', '9876543216',
+ 4, 5, NULL, '2024-01-05', 35000),
+
+('Kiran', 'Kumar', 'kiran@company.com', '9876543217',
+ 1, 1, 1, '2024-03-10', 48000);
+
+
+-- Attendance Data
+
+INSERT INTO Attendance
+(employee_id, attendance_date, status)
+VALUES
+(1, '2026-08-01', 'Present'),
+(1, '2026-08-02', 'Present'),
+(1, '2026-08-03', 'Leave'),
+(3, '2026-08-01', 'Present'),
+(3, '2026-08-02', 'Absent'),
+(3, '2026-08-03', 'Present'),
+(4, '2026-08-01', 'Present'),
+(4, '2026-08-02', 'Present'),
+(4, '2026-08-03', 'Present'),
+(5, '2026-08-01', 'Present'),
+(5, '2026-08-02', 'Leave');
+
+
+-- Salary Data
+
+INSERT INTO Salary
+(
+    employee_id,
+    effective_from,
+    basic_salary,
+    hra,
+    da,
+    allowance,
+    deduction
+)
+VALUES
+(1, '2026-01-01', 90000, 18000, 9000, 5000, 3000),
+(2, '2026-01-01', 75000, 15000, 7500, 4000, 2500),
+(3, '2026-01-01', 45000, 9000, 4500, 3000, 1500),
+(4, '2026-01-01', 65000, 13000, 6500, 4000, 2000),
+(5, '2026-01-01', 40000, 8000, 4000, 2000, 1000),
+(6, '2026-01-01', 55000, 11000, 5500, 3000, 1500),
+(7, '2026-01-01', 35000, 7000, 3500, 2000, 800),
+(8, '2026-01-01', 48000, 9600, 4800, 2500, 1200);
+
+
+-- Payroll Data
+
+INSERT INTO Payroll
+(
+    employee_id,
+    payroll_month,
+    basic_salary,
+    hra,
+    da,
+    allowance,
+    deduction,
+    net_salary
+)
+SELECT
+    employee_id,
+    '2026-08-01',
+    basic_salary,
+    hra,
+    da,
+    allowance,
+    deduction,
+    basic_salary + hra + da + allowance - deduction
+FROM Salary;

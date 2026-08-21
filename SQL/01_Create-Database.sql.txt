@@ -1,0 +1,8 @@
+-- =========================================================
+-- DATABASE: EmployeePayrollDB
+-- Purpose: Creates the Employee Payroll Database
+-- =========================================================
+
+CREATE DATABASE EmployeePayrollDB;
+
+USE EmployeePayrollDB;

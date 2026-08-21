@@ -1,0 +1,132 @@
+-- =========================================================
+-- STORED PROCEDURES
+-- Database: EmployeePayrollDB
+-- Purpose: Contains procedures for employee and payroll
+--          related operations.
+-- =========================================================
+
+USE EmployeePayrollDB;
+
+
+-- =========================================================
+-- STORED PROCEDURE 1: GetEmployeesByDepartment
+-- Purpose: Retrieves all employees belonging to a
+--          specific department.
+-- Input: p_department_id - Department ID
+-- =========================================================
+
+DELIMITER //
+
+CREATE PROCEDURE GetEmployeesByDepartment(
+    IN p_department_id INT
+)
+BEGIN
+
+    SELECT
+        e.employee_id,
+        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+        d.department_name,
+        e.basic_salary,
+        e.joining_date
+    FROM Employee e
+    JOIN Department d
+        ON e.department_id = d.department_id
+    WHERE e.department_id = p_department_id;
+
+END //
+
+DELIMITER ;
+
+
+-- =========================================================
+-- STORED PROCEDURE 2: SearchEmployees
+-- Purpose: Searches employees by name and/or department.
+-- Inputs:
+--   p_name           - Employee name (optional)
+--   p_department_id - Department ID (optional)
+-- =========================================================
+
+DELIMITER //
+
+CREATE PROCEDURE SearchEmployees(
+    IN p_name VARCHAR(100),
+    IN p_department_id INT
+)
+BEGIN
+
+    SELECT
+        e.employee_id,
+        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+        d.department_name,
+        dg.designation_name,
+        e.joining_date,
+        e.basic_salary
+    FROM Employee e
+    JOIN Department d
+        ON e.department_id = d.department_id
+    JOIN Designation dg
+        ON e.designation_id = dg.designation_id
+    WHERE
+        (
+            p_name IS NULL
+            OR CONCAT(e.first_name, ' ', e.last_name)
+               LIKE CONCAT('%', p_name, '%')
+        )
+        AND
+        (
+            p_department_id IS NULL
+            OR e.department_id = p_department_id
+        );
+
+END //
+
+DELIMITER ;
+
+
+-- =========================================================
+-- STORED PROCEDURE 3: GeneratePayroll
+-- Purpose: Generates payroll records for all employees
+--          for a given payroll month.
+-- Input: p_payroll_month - Payroll month
+--
+-- Formula:
+-- Net Salary = Basic Salary + HRA + DA
+--              + Allowance - Deduction
+-- =========================================================
+
+DELIMITER //
+
+CREATE PROCEDURE GeneratePayroll(
+    IN p_payroll_month DATE
+)
+BEGIN
+
+    INSERT INTO Payroll
+    (
+        employee_id,
+        payroll_month,
+        basic_salary,
+        hra,
+        da,
+        allowance,
+        deduction,
+        net_salary
+    )
+    SELECT
+        s.employee_id,
+        p_payroll_month,
+        s.basic_salary,
+        s.hra,
+        s.da,
+        s.allowance,
+        s.deduction,
+        s.basic_salary
+        + s.hra
+        + s.da
+        + s.allowance
+        - s.deduction
+    FROM Salary s;
+
+END //
+
+DELIMITER ;
